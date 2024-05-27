@@ -36,6 +36,7 @@ Ollama
 ### Output Parsing
 
 - [Langchain Output Parsing - LlamaIndex](https://docs.llamaindex.ai/en/stable/examples/output_parsing/LangchainOutputParserDemo/)
+- [JSON parser | 🦜️🔗 LangChain](https://python.langchain.com/v0.1/docs/modules/model_io/output_parsers/types/json/)
 
 ## Resources
 

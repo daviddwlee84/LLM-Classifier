@@ -73,7 +73,9 @@ class ClassifiedFinanceTitleWithReason(BaseModel):
 @app.get("/ollama_finance_classification")
 def ollama_finance_title_classification(
     text: str,
-    model: str = "llama2",
+    model: Literal[
+        "llama3", "phi3"
+    ] = "llama3",  # currently, phi3 are not usable; llama2 doesn't support function calling
     timeout: int = 60,
     base_url: str = BASE_URL,
     mode: Literal["pydantic", "bind_tools"] = "pydantic",
@@ -83,6 +85,8 @@ def ollama_finance_title_classification(
     https://github.com/langchain-ai/langchain/blob/cccc8fbe2fe59bde0846875f67aa046aeb1105a3/libs/experimental/langchain_experimental/llms/ollama_functions.py#L110
 
     example: https://chatgpt.com/share/888ac291-a92e-4155-b6b8-ed0d70205152
+
+    https://github.com/run-llama/llama_index/issues/7587
     """
 
     llm = OllamaFunctions(
@@ -102,32 +106,34 @@ def ollama_finance_title_classification(
         structured_llm = llm.with_structured_output(
             ClassifiedFinanceTitleWithReason, include_raw=include_raw
         )
+        # langchain_core.exceptions.OutputParserException: Failed to parse ClassifiedFinanceTitleWithReason from completion {"title": "\u8d85\u9884\u671f", "reason": "\u660e\u663e\u8868\u8ff0\u770b\u597d\u7684\u6807\u9898"}. Got: 2 validation errors for ClassifiedFinanceTitleWithReason
         response = structured_llm.invoke(text)
     elif mode == "bind_tools":
-        # llm = llm.bind_tools(
-        #     tools=[
-        #         {
-        #             "name": "get_current_weather",
-        #             "description": "Get the current weather in a given location",
-        #             "parameters": {
-        #                 "type": "object",
-        #                 "properties": {
-        #                     "location": {
-        #                         "type": "string",
-        #                         "description": "The city and state, " "e.g. San Francisco, CA",
-        #                     },
-        #                     "unit": {
-        #                         "type": "string",
-        #                         "enum": ["celsius", "fahrenheit"],
-        #                     },
-        #                 },
-        #                 "required": ["location"],
-        #             },
-        #         }
-        #     ],
-        #     function_call={"name": "get_current_weather"},
-        # )
-        raise NotImplementedError("Have not implemented bind_tools mode.")
+        llm = llm.bind_tools(
+            tools=[
+                {
+                    "name": "finance_title_classification",
+                    "description": "根据所提供的金融分析师报告的标题，分类分析师对于企业的态度",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "answer": {
+                                "type": "string",
+                                "enum": ["超预期", "一般", "低于预期", "空值"],
+                                "description": "根据标题的内容，把数据打上三种标签， 即对于该企业的态度（超预期 一般 低于预期）； 数据中存在以下几个问题： 第一条： 由于分析师普遍过度乐观或者不方便直接表述对于企业的看衰， 我希望在明显表述看好的标题才记作超预期，  隐含的描述不看好的即记作低于预期；  大部分的标题只是描述调研情况，无法反映看好或者不看好的态度；  第二条： 有的研报 是企业或者行业的综合性描述或一些例行公事的汇报， 不涉及具体企业的深度研究，这类研报不是某个企业的分析，标记为空值；",
+                            },
+                            "justification": {
+                                "type": "string",
+                                "description": "详细条列判段过程，为什么给出此标签的理由",
+                            },
+                        },
+                        "required": ["公司或企业名称"],
+                    },
+                }
+            ],
+            function_call={"name": "finance_title_classification"},
+        )
+        response = llm.invoke(text)
     else:
         raise ValueError(f"Invalid mode: {mode}")
     return response
