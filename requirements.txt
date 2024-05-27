@@ -1,0 +1,6 @@
+fastapi
+ollama
+llama-index-llms-ollama
+# langchain
+# llama-index-llms-openai
+# llama-index-program-openai
