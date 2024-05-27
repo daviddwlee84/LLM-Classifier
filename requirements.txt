@@ -1,6 +1,7 @@
 fastapi
 ollama
 llama-index-llms-ollama
-# langchain
+langchain
+langchain-experimental
 # llama-index-llms-openai
 # llama-index-program-openai

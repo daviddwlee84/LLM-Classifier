@@ -23,6 +23,10 @@ fastapi dev ./app.py
   - Function calling allows you to more reliably get structured data back from the model
 - [How to call functions with chat models | OpenAI Cookbook](https://cookbook.openai.com/examples/how_to_call_functions_with_chat_models)
 
+Ollama
+
+- [OllamaFunctions | 🦜️🔗 LangChain](https://python.langchain.com/v0.1/docs/integrations/chat/ollama_functions/)
+
 ### LlamaIndex Pydantic Program
 
 - [Pydantic Program - LlamaIndex](https://docs.llamaindex.ai/en/stable/module_guides/querying/structured_outputs/pydantic_program/)
